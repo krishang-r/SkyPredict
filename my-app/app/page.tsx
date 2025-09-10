@@ -1,15 +1,14 @@
-import App from "@/components/Navbar"
+import FlightForm from "@/components/FlightForm";
+import Header from "@/components/Header";
+import LLMBar from "@/components/ui/LLMBar";
+import { Main } from "next/document";
 
-export default function Home(){
-  return(
-    <main className="h-2vh">
-      <App />
-      <div className="h-screen">
-        hello
-      </div>
-      <div className="h-screen">
-        hello
-      </div>
+export default function Home() {
+  return (
+    <main className=" h-full w-full">
+      <Header />
+      <FlightForm />
+      <LLMBar />
     </main>
-  )
+  );
 }
