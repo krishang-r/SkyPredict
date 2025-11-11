@@ -8,7 +8,7 @@ const LLMBar = () => {
     <>
       {/* Glassmorphism Bar */}
       <div
-        className={`fixed left-1/2 -translate-x-1/2 w-[80%] z-50 rounded-lg border border-white/40 transition-all duration-500 ${open ? 'bottom-0 h-screen bg-white/80 backdrop-blur-2xl shadow-2xl' : 'bottom-0 h-15 bg-white/30 backdrop-blur-lg shadow-lg py-3'} text-center cursor-pointer`}
+        className={`fixed left-1/2 -translate-x-1/2 w-[85%] z-50 rounded-lg border border-white/40 transition-all duration-500 ${open ? 'bottom-0 h-screen bg-white/80 backdrop-blur-2xl shadow-2xl' : 'bottom-0 h-15 bg-white/30 backdrop-blur-lg shadow-lg py-3'} text-center cursor-pointer`}
         onClick={() => !open && setOpen(true)}
       >
         {!open ? (

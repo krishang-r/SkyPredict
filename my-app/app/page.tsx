@@ -5,7 +5,8 @@ import { Main } from "next/document";
 
 export default function Home() {
   return (
-    <main className=" h-full w-full">
+    // added pb-24 (padding-bottom). change to pb-32 / pb-16 as needed
+    <main className="h-full w-full pb-24">
       <Header />
       <FlightForm />
       <LLMBar />
