@@ -88,7 +88,7 @@ function parseFlightData(amadeusData: any) {
         null;
 
       // Build a readable stops/route summary
-      const route = segments.map(s => `${s.departure?.iataCode}→${s.arrival?.iataCode}`).join(", ");
+      const route = segments.map((s: any) => `${s.departure?.iataCode}→${s.arrival?.iataCode}`).join(", ");
       const stops = Math.max(0, segments.length - 1);
 
       parsed.push({
@@ -141,7 +141,7 @@ async function callPythonModel(payload: Record<string, any>): Promise<{ predicte
       try {
         const json = JSON.parse(out);
         resolve(json);
-      } catch (e) {
+      } catch (e: any) {
         reject(new Error(`Invalid JSON from python model: ${e.message} / output: ${out}`));
       }
     });
@@ -163,7 +163,10 @@ async function callPythonModel(payload: Record<string, any>): Promise<{ predicte
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let { origin, destination, date, airlines = "", currency = "INR" } = body ?? {};
+    const { origin: originRaw, destination: destRaw, date: dateRaw, airlines = "", currency = "INR" } = body ?? {};
+    let origin = originRaw;
+    let destination = destRaw;
+    let date = dateRaw;
 
     if (!origin || !destination || !date) {
       return NextResponse.json({ error: "Missing required fields: origin, destination, date" }, { status: 400 });

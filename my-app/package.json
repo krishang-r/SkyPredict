@@ -12,9 +12,11 @@
     "@heroui/system": "^2.4.20",
     "@heroui/theme": "^2.4.20",
     "@nextui-org/react": "^2.6.11",
+    "@tabler/icons-react": "^3.35.0",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.12",
+    "motion": "^12.23.24",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"

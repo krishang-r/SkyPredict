@@ -36,6 +36,8 @@ const FlightForm: React.FC = () => {
   const [results, setResults] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [modelPred, setModelPred] = useState<number | null>(null);
+  const [aiRecommendation, setAiRecommendation] = useState<any>(null);
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const selectBase =
     "appearance-none w-full rounded-xl border border-transparent bg-white/60 backdrop-blur-sm px-4 py-2 pr-12 text-sm font-medium text-gray-800 " +
@@ -62,6 +64,7 @@ const FlightForm: React.FC = () => {
     setError(null);
     setResults([]);
     setModelPred(null);
+    setAiRecommendation(null);
 
     const payload = {
       origin: extractIata(origin),
@@ -91,6 +94,32 @@ const FlightForm: React.FC = () => {
       setResults([]);
     } finally {
       setLoading(false);
+    }
+
+    // Get AI recommendation
+    const userQuery = `I want to fly from ${origin} to ${destination} on ${date} in ${flightClass} class`;
+    await getAIRecommendation(userQuery);
+  };
+
+  const getAIRecommendation = async (query: string) => {
+    setLoadingAI(true);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: query }),
+      });
+      const json = await res.json();
+      console.log("[FlightForm] AI recommendation response:", json);
+      if (res.ok) {
+        setAiRecommendation(json);
+      } else {
+        console.warn("AI recommendation failed:", json);
+      }
+    } catch (err) {
+      console.warn("AI recommendation error:", err);
+    } finally {
+      setLoadingAI(false);
     }
   };
 
@@ -163,6 +192,50 @@ const FlightForm: React.FC = () => {
         </div>
       )}
 
+      {/* AI Recommendation */}
+      {aiRecommendation && (
+        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">🤖</div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900 mb-2">AI Assistant Recommendation</h3>
+              <p className="text-gray-700 mb-3">{aiRecommendation.recommendation}</p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                {aiRecommendation.predicted_price && (
+                  <div className="bg-white rounded-lg p-2">
+                    <div className="text-gray-600">Est. Price</div>
+                    <div className="font-semibold text-blue-700">₹{Number(aiRecommendation.predicted_price).toFixed(0)}</div>
+                  </div>
+                )}
+                {aiRecommendation.best_bucket && (
+                    aiRecommendation.best_bucket !== 'unknown' ? (
+                      <div className="bg-white rounded-lg p-2">
+                        <div className="text-gray-600">Book</div>
+                        <div className="font-semibold text-blue-700">{aiRecommendation.best_bucket.replace(/_/g, ' ')}</div>
+                      </div>
+                    ) : null
+                )}
+                {aiRecommendation.confidence !== undefined && (
+                    Number(aiRecommendation.confidence) > 0 ? (
+                      <div className="bg-white rounded-lg p-2">
+                        <div className="text-gray-600">Confidence</div>
+                        <div className="font-semibold text-blue-700">{(Number(aiRecommendation.confidence) * 100).toFixed(0)}%</div>
+                      </div>
+                    ) : null
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loadingAI && (
+        <div className="mt-4 text-center text-sm text-gray-600">
+          Getting AI recommendation...
+        </div>
+      )}
+
       {error && <div className="mt-4 text-red-600 font-medium">{error}</div>}
 
       {/* Results */}
@@ -172,7 +245,7 @@ const FlightForm: React.FC = () => {
             const offerPrice = priceNumber(r.totalPrice);
             const predicted = modelPred;
             const diff = (predicted !== null && offerPrice !== null) ? (predicted - offerPrice) : null;
-            const isGoodDeal = diff !== null ? (offerPrice <= predicted) : null;
+            const isGoodDeal = (diff !== null && offerPrice !== null && predicted !== null) ? (offerPrice <= predicted) : null;
 
             return (
               <div key={i} className="p-4 bg-white/90 rounded-lg shadow-sm border flex flex-col sm:flex-row sm:items-center justify-between">
@@ -190,7 +263,7 @@ const FlightForm: React.FC = () => {
                   <div className="text-sm text-gray-600 mt-1">{String(r.cabin || "").toUpperCase()}</div>
 
                   {/* deal badge */}
-                  {predicted !== null && offerPrice !== null && (
+                  {predicted !== null && offerPrice !== null && diff !== null && (
                     <div className="mt-2">
                       {isGoodDeal ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">Below predicted by ₹{Math.abs(diff).toFixed(2)}</span>
